@@ -10,8 +10,8 @@ const port = process.env.PORT || 8080;
 
 
 
-const uri =
-  "mongodb+srv://pet-home:l7RGIYxIuASrkwKz@cluster0.0ymxkuk.mongodb.net/?appName=Cluster0";
+const uri = process.env.DB_URI;
+  
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -38,11 +38,3 @@ async function run() {
 }
 run().catch(console.dir);
 
-
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
