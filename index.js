@@ -5,14 +5,10 @@ const dotenv = require("dotenv")
 dotenv.config();
 const cors = require('cors')
 const port = process.env.PORT || 8080;
-
-
-
-
-
+app.use(cors());
+app.use(express.json());
 const uri = process.env.DB_URI;
   
-
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
@@ -27,7 +23,20 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
+    const db = client.db("pet-home");
+    const petCollection = db.collection("pet")
+    app.get("/pet", async(req,res)=>{
+      const cursor = petCollection.find();
+      const result = await cursor.toArray();
+      
+      res.send(result)
+      console.log(result)
+    })
+    const count = await petCollection.countDocuments();
+
+    console.log(count);
+
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!",
     );
@@ -37,4 +46,11 @@ async function run() {
   }
 }
 run().catch(console.dir);
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
+});
 
