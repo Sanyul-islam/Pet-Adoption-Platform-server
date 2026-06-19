@@ -33,6 +33,26 @@ async function run() {
       res.send(result)
       console.log(result)
     })
+    app.post("/pet", async (req, res) => {
+      try {
+        const petData = req.body;
+
+        const result = await petCollection.insertOne(petData);
+
+        res.status(201).send({
+          success: true,
+          insertedId: result.insertedId,
+          message: "Pet added successfully",
+        });
+      } catch (error) {
+        console.error(error);
+
+        res.status(500).send({
+          success: false,
+          message: "Failed to add pet",
+        });
+      }
+    });
     const count = await petCollection.countDocuments();
 
     console.log(count);
