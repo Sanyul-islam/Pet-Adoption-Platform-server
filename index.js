@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const dotenv = require("dotenv")
 dotenv.config();
 const cors = require('cors')
@@ -33,6 +33,12 @@ async function run() {
       res.send(result)
       console.log(result)
     })
+    app.get("/pet/:petId", async(req,res)=>{
+     const {petId} = req.params;
+     const query = {_id: new ObjectId(petId)};
+     const result = await petCollection.findOne(query);
+     res.send(result)
+    })
     app.post("/pet", async (req, res) => {
       try {
         const petData = req.body;
@@ -52,6 +58,13 @@ async function run() {
           message: "Failed to add pet",
         });
       }
+    });
+    app.get("/my-pets/:email", async (req, res) => {
+      const email = req.params.email;
+
+      const pets = await petCollection.find({ ownerEmail: email }).toArray();
+
+      res.send(pets);
     });
     const count = await petCollection.countDocuments();
 
