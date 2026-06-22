@@ -26,6 +26,10 @@ async function run() {
     // await client.db("admin").command({ ping: 1 });
     const db = client.db("pet-home");
     const petCollection = db.collection("pet")
+    const adoptionRequestsCollection = db.collection("adoption-requests");
+
+    // All-Pet Collection //
+
     app.get("/pet", async(req,res)=>{
       const cursor = petCollection.find();
       const result = await cursor.toArray();
@@ -39,6 +43,9 @@ async function run() {
      const result = await petCollection.findOne(query);
      res.send(result)
     })
+
+    // Pet add //
+
     app.post("/pet", async (req, res) => {
       try {
         const petData = req.body;
@@ -66,9 +73,39 @@ async function run() {
 
       res.send(pets);
     });
-    const count = await petCollection.countDocuments();
 
-    console.log(count);
+    // Adoption request //
+
+    app.post("/adoption-requests", async (req, res) => {
+      const request = req.body;
+
+      const result = await adoptionRequestsCollection.insertOne(request);
+
+      res.send(result);
+    });
+
+    app.get("/adoption-requests/:petId", async (req, res) => {
+      const { petId } = req.params;
+
+      const result = await adoptionRequestsCollection.find({ petId }).toArray();
+
+      res.send(result);
+    });
+
+    // Approve //
+    app.patch("/adoption-requests/approve/:id", async (req, res) => {
+      const result = await adoptionRequestsCollection.updateOne(
+        { _id: new ObjectId(req.params.id) },
+        {
+          $set: {
+            status: "approved",
+          },
+        },
+      );
+
+      res.send(result);
+    });
+    
 
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!",
