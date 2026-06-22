@@ -105,7 +105,19 @@ async function run() {
 
       res.send(result);
     });
-    
+    // Reject //
+    app.patch("/adoption-requests/reject/:id", async (req, res) => {
+      const result = await adoptionRequestsCollection.updateOne(
+        { _id: new ObjectId(req.params.id) },
+        {
+          $set: {
+            status: "rejected",
+          },
+        },
+      );
+
+      res.send(result);
+    });
 
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!",
