@@ -128,6 +128,14 @@ async function run() {
 
       res.send(result);
     });
+    // Delet Request //
+    app.delete("/adoption-requests/:id", async (req, res) => {
+      const result = await adoptionRequestsCollection.deleteOne({
+        _id: new ObjectId(req.params.id),
+      });
+
+      res.send(result);
+    });
 
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!",
