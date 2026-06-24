@@ -79,9 +79,24 @@ async function run() {
     app.post("/adoption-requests", async (req, res) => {
       const request = req.body;
 
+      const existingRequest = await adoptionRequestsCollection.findOne({
+        petId: request.petId,
+        userEmail: request.userEmail,
+      });
+
+      if (existingRequest) {
+        return res.status(400).send({
+          success: false,
+          message: "You have already requested this pet.",
+        });
+      }
+
       const result = await adoptionRequestsCollection.insertOne(request);
 
-      res.send(result);
+      res.send({
+        success: true,
+        insertedId: result.insertedId,
+      });
     });
 
     app.get("/adoption-requests/:petId", async (req, res) => {
@@ -136,6 +151,7 @@ async function run() {
 
       res.send(result);
     });
+    
 
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!",
