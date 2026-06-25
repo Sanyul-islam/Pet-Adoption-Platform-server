@@ -1,14 +1,14 @@
 const express = require("express");
 const app = express();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-const dotenv = require("dotenv")
+const dotenv = require("dotenv");
 dotenv.config();
-const cors = require('cors')
+const cors = require("cors");
 const port = process.env.PORT || 8080;
 app.use(cors());
 app.use(express.json());
 const uri = process.env.DB_URI;
-  
+
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
@@ -25,24 +25,40 @@ async function run() {
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     const db = client.db("pet-home");
-    const petCollection = db.collection("pet")
+    const petCollection = db.collection("pet");
     const adoptionRequestsCollection = db.collection("adoption-requests");
 
     // All-Pet Collection //
 
-    app.get("/pet", async(req,res)=>{
-      const cursor = petCollection.find();
-      const result = await cursor.toArray();
-      
-      res.send(result)
-      console.log(result)
-    })
-    app.get("/pet/:petId", async(req,res)=>{
-     const {petId} = req.params;
-     const query = {_id: new ObjectId(petId)};
-     const result = await petCollection.findOne(query);
-     res.send(result)
-    })
+    app.get("/pet", async (req, res) => {
+      const { search = "", species = "" } = req.query;
+
+      const query = {};
+
+      if (search) {
+        query.petName = {
+          $regex: search,
+          $options: "i",
+        };
+      }
+
+      if (species) {
+        query.species = {
+          $in: [species],
+        };
+      }
+
+      const result = await petCollection.find(query).toArray();
+
+      res.send(result);
+    });
+
+    app.get("/pet/:petId", async (req, res) => {
+      const { petId } = req.params;
+      const query = { _id: new ObjectId(petId) };
+      const result = await petCollection.findOne(query);
+      res.send(result);
+    });
 
     // Pet add //
 
@@ -133,7 +149,7 @@ async function run() {
 
       res.send(result);
     });
-    // User Request // 
+    // User Request //
     app.get("/my-requests/:email", async (req, res) => {
       const email = req.params.email;
 
@@ -151,7 +167,6 @@ async function run() {
 
       res.send(result);
     });
-    
 
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!",
@@ -169,4 +184,3 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
-
