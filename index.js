@@ -90,6 +90,41 @@ async function run() {
       res.send(pets);
     });
 
+    //update pet //
+
+    app.put("/pet/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedPet = req.body;
+
+      const query = {
+        _id: new ObjectId(id),
+      };
+
+      const updateDoc = {
+        $set: updatedPet,
+      };
+
+      const result = await petCollection.updateOne(query, updateDoc);
+
+      res.send(result);
+    });
+
+    // Delet pet // 
+    app.delete("/pet/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+
+        const result = await petCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: "Failed to delete pet" });
+      }
+    });
+
     // Adoption request //
 
     app.post("/adoption-requests", async (req, res) => {
